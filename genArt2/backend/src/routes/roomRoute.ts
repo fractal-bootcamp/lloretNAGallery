@@ -14,16 +14,16 @@ const roomController = new RoomController();
 // Get all rooms
 router.get('/all', roomController.getAllRooms.bind(roomController));
 
-// Get room by Id
-router.get('/room/:id', roomController.getRoomById.bind(roomController));
+// Get room by period
+router.get('/room/period', roomController.getRoomByPeriod.bind(roomController));
 
 // Create a new room
 router.post('/room/new', roomController.createRoom.bind(roomController));
 
 // Update a room
-router.put('/room/:id', roomController.updateRoom.bind(roomController));
+router.put('/room/period', roomController.updateRoom.bind(roomController));
 
 // Delete a room
-router.delete('/room/:id', roomController.deleteRoom.bind(roomController));
+router.delete('/room/period', roomController.deleteRoomsByPeriod.bind(roomController));
 
 export default router;
