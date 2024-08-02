@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  // Remove or comment out this line if not needed
+  // directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id        String     @id @default(cuid())
+  name      String
+  email     String     @unique
+  // clerkId   String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  isDeleted Boolean    @default(false)
+  avatarUrl String?
+
+  paintings    Painting[]
+}
+
+model Painting {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  isPublished Boolean  @default(false)
+  isDeleted   Boolean  @default(false)
+  
+  // AI generation parameters
+  prompt      String
+  negativePrompt String?
+  seed        Int?
+  
+  // Image data
+  imageUrl    String
+  
+  // Frame details
+  frameTexture String
+  frameColor   String?
+  
+  // Room association
+  roomId      String
+  room        Room     @relation(fields: [roomId], references: [id])
+  
+  // Creator association
+  creatorId   String
+  creator     User     @relation(fields: [creatorId], references: [id])
+}
+
+model Room {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  period      ArtPeriod
+  
+  paintings   Painting[]
+}
+
+enum ArtPeriod {
+  HELLENISTIC
+  RENAISSANCE
+  BAROQUE
+  NEOCLASSICISM
+  REALISM
+  VANGUARDISM
+}
