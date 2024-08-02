@@ -1,112 +1,132 @@
 import { PrismaClient } from '@prisma/client';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { faker } from '@faker-js/faker';
-import fs from 'fs';
-import path from 'path';
 
 const prisma = new PrismaClient();
 
-const s3 = new S3Client({
-    region: 'us-east-2', // e.g., 'us-west-2'
-    credentials: {
-        accessKeyId: 'your-access-key-id',
-        secretAccessKey: 'your-secret-access-key'
-    }
-});
-
-// Placeholder image URL for direct use
-const placeholderImageUrl = "https://via.placeholder.com/150";
-
-async function uploadImageToS3(imageUrl: string, key: string): Promise<string> {
-    const uploadParams = {
-        Bucket: 'lloret-neue-alt-gallery',
-        Key: key,
-        Body: imageUrl,
-        ContentType: 'image/jpeg', // Adjust based on your image type
-    };
-
-    try {
-        await s3.send(new PutObjectCommand(uploadParams));
-        return `https://${uploadParams.Bucket}.s3.amazonaws.com/${key}`;
-    } catch (error) {
-        console.error('Error uploading image:', error);
-        throw error;
-    }
-}
+// Define the public domain image URLs for each art period
+const imageUrls = {
+    HELLENISTIC: [
+        'https://upload.wikimedia.org/wikipedia/commons/a/a6/Laoco%C3%B6n_and_his_sons_group.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/e/ed/Apollo_Belvedere.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/2/29/Sanctuary_of_Asclepius%2C_Pergamon.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/e/e2/Three_Graces_Louvre_Ma287.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/a/af/V%C3%A9nus_de_Milo_-_Mus%C3%A9e_du_Louvre_AGER_LL_299_%3B_N_527_%3B_Ma_399.jpg',
+    ],
+    RENAISSANCE: [
+        'https://upload.wikimedia.org/wikipedia/commons/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/4/49/%22The_School_of_Athens%22_by_Raffaello_Sanzio_da_Urbino.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/0/08/Leonardo_da_Vinci_%281452-1519%29_-_The_Last_Supper_%281495-1498%29.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/e/e4/Leonardo_Da_Vinci_-_Vergine_delle_Rocce_%28Louvre%29.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/2/22/Da_Vinci_Vitruve_Luc_Viatour.jpg',
+    ],
+    BAROQUE: [
+        'https://upload.wikimedia.org/wikipedia/commons/3/34/The_Entombment_of_Christ-Caravaggio_%28c.1602-3%29.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/e/e6/Museo_borghese%2C_sala_del_gladiatore%2C_g.l._bernini%2C_verit%C3%A0_svelata%2C_1645-52%2C_02.JPG',
+        'https://upload.wikimedia.org/wikipedia/commons/b/bb/The_Conversion_of_Saint_Paul-Caravaggio_%28c._1600-1%29.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/5/5a/The_Night_Watch_-_HD.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/3/36/Rape_of_Prosepina_September_2015-3a.jpg',
+    ],
+    NEOCLASSICISM: [
+        'https://upload.wikimedia.org/wikipedia/commons/8/8c/David_-_The_Death_of_Socrates.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/8/8c/David_-_The_Death_of_Socrates.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/8/8c/David_-_The_Death_of_Socrates.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/8/8c/David_-_The_Death_of_Socrates.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/8/8c/David_-_The_Death_of_Socrates.jpg',
+    ],
+    REALISM: [
+        'https://upload.wikimedia.org/wikipedia/commons/4/46/Gustave_Courbet_-_The_Stonebreakers_-_WGA05457.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/4/46/Gustave_Courbet_-_The_Stonebreakers_-_WGA05457.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/4/46/Gustave_Courbet_-_The_Stonebreakers_-_WGA05457.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/4/46/Gustave_Courbet_-_The_Stonebreakers_-_WGA05457.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/4/46/Gustave_Courbet_-_The_Stonebreakers_-_WGA05457.jpg',
+    ],
+    VANGUARDISM: [
+        'https://www.wikiart.org/en/salvador-dali/the-persistence-of-memory-1931',
+        'https://www.wikiart.org/en/salvador-dali/the-persistence-of-memory-1931',
+        'https://www.wikiart.org/en/salvador-dali/the-persistence-of-memory-1931',
+        'https://www.wikiart.org/en/salvador-dali/the-persistence-of-memory-1931',
+        'https://www.wikiart.org/en/salvador-dali/the-persistence-of-memory-1931',
+    ],
+};
 
 async function main() {
-    // Create Users
-    const users = Array.from({ length: 10 }).map(() => ({
-        name: faker.person.fullName(),
-        email: faker.internet.email(),
-        avatarUrl: faker.image.avatar(),
-    }));
+    // Clean up existing data
+    await prisma.painting.deleteMany({});
+    await prisma.room.deleteMany({});
+    await prisma.user.deleteMany({});
 
-    await prisma.user.createMany({
-        data: users,
+    // Create a user if none exists
+    const user = await prisma.user.upsert({
+        where: { email: 'admin@example.com' },
+        update: {},
+        create: {
+            name: 'Admin',
+            email: 'admin@example.com',
+            avatarUrl: null,
+        },
     });
 
-    console.log('Users created.');
-
-    // Create Rooms based on ArtPeriod enum
-    const artPeriods = [
-        'HELLENISTIC',
-        'RENAISSANCE',
-        'BAROQUE',
-        'NEOCLASSICISM',
-        'REALISM',
-        'VANGUARDISM'
-    ];
-
-    const rooms = artPeriods.map(period => ({
-        name: period,
-        description: faker.lorem.sentence(),
-        period: period as 'HELLENISTIC' | 'RENAISSANCE' | 'BAROQUE' | 'NEOCLASSICISM' | 'REALISM' | 'VANGUARDISM',
-    }));
-
-    await prisma.room.createMany({
-        data: rooms,
+    // Create rooms if they don't exist
+    const existingRooms = await prisma.room.findMany({
+        select: { period: true },
     });
+    const existingPeriods = new Set(existingRooms.map(room => room.period));
 
-    console.log('Rooms created.');
-
-    // Fetch created users and rooms
-    const createdUsers = await prisma.user.findMany();
-    const createdRooms = await prisma.room.findMany();
-
-    if (createdUsers.length === 0 || createdRooms.length === 0) {
-        throw new Error('No users or rooms found to associate with paintings.');
+    for (const period of Object.keys(imageUrls) as Array<ArtPeriod>) {
+        if (!existingPeriods.has(period)) {
+            await prisma.room.create({
+                data: {
+                    period: period,
+                    name: `${period} Room`,  // Default name for the room
+                },
+            });
+        }
     }
 
-    // Create Paintings
-    const paintingPromises = Array.from({ length: 20 }).map(async () => {
-        const creatorId = faker.helpers.arrayElement(createdUsers).id;
-        const roomId = faker.helpers.arrayElement(createdRooms).id;
-
-        // Use placeholder image directly
-        const imageUrl = placeholderImageUrl;
-
-        // You could also upload the placeholder image if needed:
-        // const localImagePath = path.join(__dirname, 'sample.jpg');
-        // const imageUrl = await uploadImageToS3(localImagePath, `paintings/${faker.string.uuid()}.jpg`);
-
-        return prisma.painting.create({
-            data: {
-                title: faker.lorem.sentence(),
-                description: faker.lorem.paragraph(),
-                prompt: faker.lorem.sentence(),
-                negativePrompt: faker.lorem.sentence(),
-                seed: faker.number.int({ min: 0, max: 2147483647 }), // Ensure seed is within valid range for Int
-                imageUrl,
-                frameTexture: faker.word.adjective(),
-                frameColor: faker.color.human(),
-                roomId,
-                creatorId,
+    // Fetch all rooms from the database
+    const rooms = await prisma.room.findMany({
+        where: {
+            period: {
+                in: Object.keys(imageUrls) as Array<ArtPeriod>,
             },
-        });
+        },
     });
 
-    await Promise.all(paintingPromises);
+    console.log('Fetched rooms:', rooms); // Log the fetched rooms
+
+    const roomMap = new Map<string, string>();
+    rooms.forEach(room => roomMap.set(room.period, room.id));
+
+    // Function to create paintings
+    const createPaintings = async (period: ArtPeriod) => {
+        const roomId = roomMap.get(period);
+        if (!roomId) {
+            console.error(`Room not found for period: ${period}`);
+            return;
+        }
+
+        const paintings = imageUrls[period];
+        for (const imageUrl of paintings) {
+            await prisma.painting.create({
+                data: {
+                    title: faker.lorem.words(3),
+                    description: faker.lorem.sentence(),
+                    prompt: faker.lorem.sentence(),
+                    negativePrompt: faker.lorem.sentence(),
+                    seed: faker.number.int({ min: 1, max: 100000 }),
+                    imageUrl: imageUrl,
+                    frameTexture: 'wood',
+                    frameColor: 'brown',
+                    roomId: roomId,
+                    creatorId: user.id,
+                },
+            });
+        }
+    };
+
+    for (const period of Object.keys(imageUrls) as Array<ArtPeriod>) {
+        await createPaintings(period);
+    }
 
     console.log('Paintings created.');
 }
