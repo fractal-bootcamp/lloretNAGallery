@@ -1,7 +1,9 @@
 import type { Request, Response } from 'express';
 import { RoomModel } from '../models/roomModel';  // Adjust path as necessary
+import { ArtPeriod } from '@prisma/client'
 
 const roomModel = new RoomModel();
+
 
 export class RoomController {
 
@@ -17,20 +19,22 @@ export class RoomController {
             res.status(500).json({ message: 'Error fetching rooms' });
         }
     }
+    // Get rooms by Period
+    async getRoomByPeriod(req: Request, res: Response): Promise<void> {
+        const period = req.query.period as string;  // Use params to get the period from the URL
 
-    // Get room by Id
-    async getRoomById(req: Request, res: Response): Promise<void> {
-        const { id } = req.params;  // Use params to get room ID from the URL
+        const artPeriod: ArtPeriod = period as ArtPeriod;
+
         try {
-            const room = await roomModel.getRoomById(id);
-            if (room) {
-                res.status(200).json(room);
+            const rooms = await roomModel.getRoomByPeriod(artPeriod); // Adjust the model method if necessary
+            if (rooms.length > 0) {
+                res.status(200).json(rooms);
             } else {
-                res.status(404).json({ message: 'Room not found' });
+                res.status(404).json({ message: 'No rooms found for the given period' });
             }
         } catch (error) {
             console.error(error);
-            res.status(500).json({ message: 'Error fetching room' });
+            res.status(500).json({ message: 'Error fetching rooms' });
         }
     }
 
@@ -48,11 +52,13 @@ export class RoomController {
 
     // Update an existing room
     async updateRoom(req: Request, res: Response): Promise<void> {
-        const { id } = req.params;  // Use params to get room ID from the URL
-        const { name, description, period } = req.body;
+        const period = req.query.period as string  // Use params to get room ID from the URL
+        const { name, description } = req.body;
+        const artPeriod: ArtPeriod = period as ArtPeriod;
+
         try {
-            const updatedRoom = await roomModel.updateRoom(id, { name, description, period });
-            if (updatedRoom) {
+            const updatedRoom = await roomModel.updateRoom(artPeriod, { name, description });
+            if (updatedRoom !== undefined) {
                 res.status(200).json(updatedRoom);
             } else {
                 res.status(404).json({ message: 'Room not found' });
@@ -64,10 +70,12 @@ export class RoomController {
     }
 
     // Delete a room
-    async deleteRoom(req: Request, res: Response): Promise<void> {
-        const { id } = req.params;  // Use params to get room ID from the URL
+    async deleteRoomsByPeriod(req: Request, res: Response): Promise<void> {
+        const period = req.query.period;  // Use params to get room ID from the URL
+        const artPeriod: ArtPeriod = period as ArtPeriod;
+
         try {
-            const deletedRoom = await roomModel.deleteRoom(id);
+            const deletedRoom = await roomModel.deleteRoomsByPeriod(artPeriod);
             if (deletedRoom) {
                 res.status(200).json({ message: 'Room deleted' });
             } else {
