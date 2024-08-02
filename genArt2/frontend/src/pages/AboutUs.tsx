@@ -1,7 +1,7 @@
 export default function AboutUs() {
   return (
     <div>
-      <h1>About Us</h1>
+      <h1 className="p-2">About Us</h1>
       <p>
         The Alt-Neue-Cibernetikum Gallery initiative is a responsive digital
         online art gallery. Here, users can visit several rooms organized

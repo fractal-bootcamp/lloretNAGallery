@@ -20,21 +20,22 @@ const router = createBrowserRouter([
     element: <RootLayout />,
     children: [
       { path: "/", element: <IndexPage /> },
-      // { path: "/sign-in/*", element: <SignInPage /> },
-      // { path: "/sign-up/*", element: <SignUpPage /> },
       {
         path: "/gallery",
-        element: (
-          // ProtectedRoute IF we are Auth
-          // <ProtectedRoute>
-          <GalleryPage />
-          // </ProtectedRoute>
-        ),
+        element: <GalleryPage />, // This is the base component for the gallery
+        children: [
+          { path: "", element: <GalleryPage content="default" /> }, // Default or overview page
+          {
+            path: "Hellenistic",
+            element: <GalleryPage content="Hellenistic" />,
+          },
+          {
+            path: "Renaissance",
+            element: <GalleryPage content="Renaissance" />,
+          },
+          // Additional nested routes
+        ],
       },
-      // {
-      //   path: "/artists",
-      //   element: <ArtistsPage />,
-      // },
       {
         path: "/about",
         element: <AboutUs />,

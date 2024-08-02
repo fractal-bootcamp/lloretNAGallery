@@ -9,7 +9,7 @@ import {
   ArtPeriod,
   Rooms,
 } from "../../../shared/types/models";
-import VisualizerList from "./common/VisualizerList";
+import GalleryVisualizer from "./common/GalleryVisualizer";
 
 //KEY ****
 // Create an instance of RoomService
@@ -29,6 +29,7 @@ const artItemStyle: React.CSSProperties = {
 
 const Gallery: React.FC = () => {
   const [gallery, setGallery] = useState<Rooms[]>([]);
+
   // const { getToken } = useAuth();
 
   useEffect(() => {
@@ -47,6 +48,7 @@ const Gallery: React.FC = () => {
         if (artData) {
           console.log("Rooms fetched:", artData);
           setGallery(artData);
+          // setSingleRoom(artData);
         }
       } catch (error) {
         console.error("Error fetching art:", error);
@@ -66,9 +68,11 @@ const Gallery: React.FC = () => {
 
   console.log("All rooms:", gallery);
 
+  const handleDisplayIndividualRoom = () => {};
+
   return (
     <div>
-      <VisualizerList rooms={gallery} />
+      <GalleryVisualizer rooms={gallery} />
     </div>
   );
 };
