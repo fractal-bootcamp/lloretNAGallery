@@ -49,7 +49,10 @@ const GalleryVisualizer: React.FC<GalleryVisualizerProps> = ({ rooms }) => {
 
           return (
             <div key={room.id} className="mb-12 py-6 flex justify-center">
-              <Link to={`/gallery/${room.id}`} className="text-3xl font-bold">
+              <Link
+                to={`/gallery/${room.period}`}
+                className="text-3xl font-bold"
+              >
                 {room.name}
               </Link>
               <p className="text-lg">{room.description}</p>

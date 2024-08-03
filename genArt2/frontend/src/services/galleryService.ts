@@ -1,5 +1,6 @@
 //src/services/galleryService.ts
 
+import { ArtPeriod } from '@shared/types/models';
 import axios from 'axios';
 
 const API_URL = 'http://localhost:3000'; // Define your backend API URL
@@ -26,14 +27,14 @@ export class RoomService {
         }
     }
 
-    // Fetch a room by ID
-    async getRoomById(id: string): Promise<Room> {
+    // Fetch a room by Period
+    async getRoomByPeriod(period: ArtPeriod): Promise<Room> {
         try {
-            const response = await axios.get<Room>(`${API_URL}/gallery/${id}`);
-            console.log("getRoomById from roomService", response.data);
+            const response = await axios.get<Room>(`${API_URL}/gallery/${period}`);
+            console.log("getRoomByPeriod from roomService", response.data);
             return response.data;
         } catch (error) {
-            console.error('Error fetching room by ID:', error);
+            console.error('Error fetching room by Period:', error);
             throw error;
         }
     }
@@ -49,10 +50,10 @@ export class RoomService {
         }
     }
 
-    // Update a room by ID
-    async updateRoom(id: string, updatedRoom: Partial<Omit<Room, 'id'>>): Promise<Room> {
+    // Update a room by Period
+    async updateRoom(period: ArtPeriod, updatedRoom: Partial<Omit<Room, 'id'>>): Promise<Room> {
         try {
-            const response = await axios.put<Room>(`${API_URL}/gallery/room/${id}`, updatedRoom);
+            const response = await axios.put<Room>(`${API_URL}/gallery/room/${period}`, updatedRoom);
             console.log("updateRoom from roomService", response.data);
             return response.data;
         } catch (error) {
@@ -61,9 +62,9 @@ export class RoomService {
         }
     }
 
-    async deleteRoom(id: string): Promise<void> {
+    async deleteRoom(period: ArtPeriod): Promise<void> {
         try {
-            await axios.delete<void>(`${API_URL}/gallery/room/${id}`)
+            await axios.delete<void>(`${API_URL}/gallery/room/${period}`)
         } catch (error) {
             console.error('Error deleting room', error);
             throw error;

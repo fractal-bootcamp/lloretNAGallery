@@ -14,8 +14,9 @@ import AboutUs from "./pages/AboutUs.tsx";
 // import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import GalleryPage from "./pages/rooms/GalleryPage.tsx";
 // import Artists from "./components/Artists.tsx";
-import HellenisticGallery from "./pages/art/HellenisticRoom";
+import HellenisticGallery from "./pages/rooms/HellenisticRoom.tsx";
 import RoomVisualizer from "./components/common/RoomVisualizer.tsx";
+import GalleryDetail from "./components/common/GalleryDetail.tsx";
 
 const router = createBrowserRouter([
   {
@@ -23,20 +24,12 @@ const router = createBrowserRouter([
     children: [
       { path: "/", element: <IndexPage /> },
       {
-        path: "/gallery",
-        element: <GalleryPage />, // This is the base component for the gallery
-        children: [
-          { path: "", element: <GalleryPage content="overview" /> }, // Overview or default content
-          {
-            path: "hellenistic",
-            element: <RoomVisualizer content="Hellenistic" />,
-          },
-          // {
-          //   path: "Renaissance",
-          //   element: <RoomVisualizer content="Renaissance" />,
-          // },
-          // Additional nested routes
-        ],
+        path: "/gallery/all",
+        element: <GalleryPage />,
+      },
+      {
+        path: "/gallery/:period",
+        element: <GalleryDetail />, // A new component for displaying gallery details
       },
       {
         path: "/about",

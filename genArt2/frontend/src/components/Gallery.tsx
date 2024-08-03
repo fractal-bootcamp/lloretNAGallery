@@ -10,6 +10,7 @@ import {
   Rooms,
 } from "../../../shared/types/models";
 import GalleryVisualizer from "./common/GalleryVisualizer";
+import HellenisticGallery from "../pages/rooms/HellenisticRoom";
 
 //KEY ****
 // Create an instance of RoomService
@@ -45,6 +46,7 @@ const Gallery: React.FC = () => {
       //   }
       try {
         const artData = await roomService.getAllRooms();
+        console.log("artData", artData);
         if (artData) {
           console.log("Rooms fetched:", artData);
           setGallery(artData);
@@ -68,11 +70,10 @@ const Gallery: React.FC = () => {
 
   console.log("All rooms:", gallery);
 
-  const handleDisplayIndividualRoom = () => {};
-
   return (
     <div>
       <GalleryVisualizer rooms={gallery} />
+      <HellenisticGallery rooms={gallery} />
     </div>
   );
 };
