@@ -3,6 +3,16 @@ import { faker } from '@faker-js/faker';
 
 const prisma = new PrismaClient();
 
+// Enum for Art Period
+export enum ArtPeriod {
+    HELLENISTIC = 'HELLENISTIC',
+    RENAISSANCE = 'RENAISSANCE',
+    BAROQUE = 'BAROQUE',
+    NEOCLASSICISM = 'NEOCLASSICISM',
+    REALISM = 'REALISM',
+    VANGUARDISM = 'VANGUARDISM',
+}
+
 // Define the public domain image URLs for each art period
 const imageUrls = {
     HELLENISTIC: [
@@ -41,11 +51,11 @@ const imageUrls = {
         'https://upload.wikimedia.org/wikipedia/commons/4/46/Gustave_Courbet_-_The_Stonebreakers_-_WGA05457.jpg',
     ],
     VANGUARDISM: [
-        'https://www.wikiart.org/en/salvador-dali/the-persistence-of-memory-1931',
-        'https://www.wikiart.org/en/salvador-dali/the-persistence-of-memory-1931',
-        'https://www.wikiart.org/en/salvador-dali/the-persistence-of-memory-1931',
-        'https://www.wikiart.org/en/salvador-dali/the-persistence-of-memory-1931',
-        'https://www.wikiart.org/en/salvador-dali/the-persistence-of-memory-1931',
+        'https://en.wikipedia.org/wiki/Fountain_%28Duchamp%29#/media/File:Marcel_Duchamp,_1917,_Fountain,_photograph_by_Alfred_Stieglitz.jpg',
+        'https://en.wikipedia.org/wiki/Fountain_%28Duchamp%29#/media/File:Marcel_Duchamp,_1917,_Fountain,_photograph_by_Alfred_Stieglitz.jpg',
+        'https://en.wikipedia.org/wiki/Fountain_%28Duchamp%29#/media/File:Marcel_Duchamp,_1917,_Fountain,_photograph_by_Alfred_Stieglitz.jpg',
+        'https://en.wikipedia.org/wiki/Fountain_%28Duchamp%29#/media/File:Marcel_Duchamp,_1917,_Fountain,_photograph_by_Alfred_Stieglitz.jpg',
+        'https://en.wikipedia.org/wiki/Fountain_%28Duchamp%29#/media/File:Marcel_Duchamp,_1917,_Fountain,_photograph_by_Alfred_Stieglitz.jpg',
     ],
 };
 
@@ -77,7 +87,8 @@ async function main() {
             await prisma.room.create({
                 data: {
                     period: period,
-                    name: `${period} Room`,  // Default name for the room
+                    name: `${period}`,  // Default name for the room
+                    description: faker.lorem.paragraph(), // Adding a description
                 },
             });
         }

@@ -8,9 +8,8 @@ export default function IndexPage() {
         <h1>The moving gallery</h1>
         <div className="py-7">
           <ul>
-            <li></li>
             <li>
-              <Link to="/gallery">Meet our gallery</Link>
+              <Link to="/gallery/all">Meet our gallery</Link>
             </li>
           </ul>
         </div>
